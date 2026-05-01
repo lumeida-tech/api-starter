@@ -1,0 +1,19 @@
+litestar[standard,piccolo]
+pydantic
+pydantic-settings
+pydantic[email]
+python-dotenv
+gunicorn
+uvicorn[standard]
+asyncpg
+argon2-cffi
+python-jose[cryptography]
+aiosmtplib
+jinja2
+minio
+
+# Testing
+pytest
+pytest-asyncio
+anyio
+httpx

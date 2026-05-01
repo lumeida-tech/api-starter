@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     MINIO_SECURE:     bool = False
     MINIO_PUBLIC_URL: str  = "http://localhost:9000"
 
+    # Redis (Huey task queue)
+    REDIS_URL: str = "redis://localhost:6379/0"
+
     # Frontend
     FRONTEND_URL: str = "http://localhost:3000"
 

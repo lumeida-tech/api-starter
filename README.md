@@ -17,6 +17,7 @@ Cloner, configurer le `.env`, implémenter les services — c'est tout.
 | Validation | Pydantic v2 + pydantic-settings |
 | Email | aiosmtplib + Jinja2 (templates HTML) |
 | Tests | Pytest + Litestar TestClient |
+| Task queue | [Huey](https://huey.readthedocs.io) + Redis — tâches async et cron jobs |
 | Serveur prod | Gunicorn + Uvicorn workers |
 
 ---
@@ -174,6 +175,7 @@ Ensuite :
 | `make migrate` | Applique toutes les migrations |
 | `make migration app=xxx` | Génère une migration pour la feature `xxx` |
 | `make feature name=xxx` | Génère le squelette d'une nouvelle feature |
+| `make worker` | Lance le worker Huey en local |
 | `make test` | Lance tous les tests Pytest |
 
 ---
@@ -212,6 +214,40 @@ ou sur une route spécifique :
 async def secret(self) -> dict:
     ...
 ```
+
+---
+
+## Tâches en arrière-plan (Huey)
+
+Les tâches sont définies dans `features/<feature>/tasks.py` et exécutées par le worker Huey.
+
+**Tâche ponctuelle** — déclenché depuis un controller ou un service :
+
+```python
+# features/auth/tasks.py
+@huey.task()
+def send_welcome_task(to_email: str, name: str) -> None:
+    asyncio.run(send_welcome_email(to_email, name))
+
+# Appel depuis le service (non bloquant)
+send_welcome_task(user.email, user.full_name)
+```
+
+**Cron job** — s'exécute automatiquement selon le planning :
+
+```python
+@huey.periodic_task(cron("0 3 * * *"))  # tous les jours à 3h
+def cleanup_expired_tokens() -> None:
+    ...
+```
+
+**Lancer le worker en local :**
+
+```bash
+make worker
+```
+
+En production le worker tourne comme service Docker séparé (`worker` dans `compose.yml`).
 
 ---
 

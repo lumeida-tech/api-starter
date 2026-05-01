@@ -15,10 +15,35 @@ services:
     environment:
       POSTGRES_HOST: db
       MINIO_ENDPOINT: minio:9000
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       db:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Worker — Huey consumer (tâches en arrière-plan)
+  # ──────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+    command: huey_consumer core.worker.huey -w 2 -k thread
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      MINIO_ENDPOINT: minio:9000
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - .:/app
@@ -40,6 +65,23 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Redis — Broker Huey
+  # Port : 6379
+  # ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -85,3 +127,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  redis_data:

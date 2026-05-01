@@ -85,6 +85,18 @@ def main():
             ")\n"
         ),
 
+        "tasks.py": (
+            "from core.worker import huey\n\n\n"
+            "# Tâche en arrière-plan\n"
+            "# @huey.task()\n"
+            f"# def {name}_task(param: str) -> None:\n"
+            "#     ...\n\n\n"
+            "# Tâche planifiée (cron)\n"
+            "# @huey.periodic_task(cron('0 9 * * *'))  # tous les jours à 9h\n"
+            f"# def {name}_daily_job() -> None:\n"
+            "#     ...\n"
+        ),
+
         f"test_{name}.py": (
             "import pytest\n"
             "from litestar.testing import TestClient\n\n"

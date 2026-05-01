@@ -19,6 +19,9 @@ install:
 dev:
 	PICCOLO_CONF=$(PICCOLO_CONF) uvicorn app:app --reload --host 0.0.0.0 --port 8000
 
+worker:
+	huey_consumer core.worker.huey -w 2 -k thread
+
 # ── Migrations ────────────────────────────────────────────────────────────────
 
 # Exemple : make migration app=auth
@@ -39,4 +42,4 @@ test:
 feature:
 	@python3 scripts/new_feature.py $(name)
 
-.PHONY: up down logs install dev migration migrate test feature
+.PHONY: up down logs install dev worker migration migrate test feature

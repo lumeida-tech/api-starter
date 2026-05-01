@@ -11,6 +11,7 @@ python-jose[cryptography]
 aiosmtplib
 jinja2
 minio
+huey[redis]
 
 # Testing
 pytest
